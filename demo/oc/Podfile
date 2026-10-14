@@ -1,0 +1,22 @@
+platform :ios, '15.0'
+project 'Sample.xcodeproj'
+target 'Sample' do
+  pod 'JAdbidSDK/AdMob', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0'
+  pod 'JAdbidSDK/Bigo', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0'
+  pod 'JAdbidSDK/Facebook', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0'
+  pod 'JAdbidSDK/Fyber', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0'
+  pod 'JAdbidSDK/InMobi', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0'
+  pod 'JAdbidSDK/IronSource', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0'
+  pod 'JAdbidSDK/Mintegral', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0'
+  pod 'JAdbidSDK/Pangle', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0'
+  pod 'JAdbidSDK/Unity', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0'
+  pod 'JAdbidSDK/Vungle', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0'
+  pod 'JAdbidSDK/Yandex', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0'
+end
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'x86_64'
+    end
+  end
+end
