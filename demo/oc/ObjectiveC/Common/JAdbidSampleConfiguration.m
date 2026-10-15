@@ -20,7 +20,11 @@
 - (NSString *)adUnitIDForKey:(NSString *)key {
   return self.values[key] ?: @"";
 }
-- (void)configureSDKConfig:(JAdConfig *)config { /* 公开Demo由宿主决定配置，不开启内部测试能力。 */
+- (void)configureSDKConfig:(JAdConfig *)config {
+#if DEBUG
+  // 宿主Debug也可能链接Release SDK，需显式启用联调日志。
+  config.debugMode = YES;
+#endif
 }
 - (NSString *)diagnosticTextForError:(JAdError *)error {
   return error.message ?: @"广告请求失败";

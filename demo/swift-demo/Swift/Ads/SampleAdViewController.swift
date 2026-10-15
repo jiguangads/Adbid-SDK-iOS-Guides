@@ -1,6 +1,31 @@
 import JAdbidCore
 import UIKit
 
+// BEGIN JADBID_DEMO_INFO_FIELDS
+// 当前公开字段优先；仅兼容根工程已核验的旧SDK快照，不搜索其它别名。
+private func jadbidDemoInfoFields(_ info: NSObject?) -> (network: String, source: String) {
+  let networkValue: Any?
+  let sourceValue: Any?
+  if let info = info, info.responds(to: NSSelectorFromString("networkName")) {
+    networkValue = info.value(forKey: "networkName")
+  } else if let info = info, info.responds(to: NSSelectorFromString("adSourceName")) {
+    networkValue = info.value(forKey: "adSourceName")
+  } else {
+    networkValue = nil
+  }
+  if let info = info, info.responds(to: NSSelectorFromString("sourceIdentifier")) {
+    sourceValue = info.value(forKey: "sourceIdentifier")
+  } else if let info = info, info.responds(to: NSSelectorFromString("adSourceId")) {
+    sourceValue = info.value(forKey: "adSourceId")
+  } else {
+    sourceValue = nil
+  }
+  let network = (networkValue as? String).flatMap { $0.isEmpty ? nil : $0 } ?? "未知"
+  let source = (sourceValue as? String).flatMap { $0.isEmpty ? nil : $0 } ?? "未知"
+  return (network, source)
+}
+// END JADBID_DEMO_INFO_FIELDS
+
 enum SampleAdFormat: String, CaseIterable {
   case banner = "Banner"
   case interstitial = "Interstitial"
@@ -115,6 +140,8 @@ final class SampleAdViewController: UIViewController {
     loading = true
     showButton.isEnabled = false
     statusLabel.text = "加载中…"
+    sampleConsoleLog("load.begin", format: format.rawValue.lowercased(),
+                     debugEnabled: JAdManager.shared().debugMode)
     switch format {
     case .banner:
       let ad = JBannerAd(adUnitID: adUnitID)
@@ -201,14 +228,23 @@ final class SampleAdViewController: UIViewController {
   }
 
   fileprivate func failed(_ stage: String, error: JAdError) {
+    sampleConsoleLog(stage == "load" ? "load.failure" : "show.failure", format: format.rawValue.lowercased(),
+                     code: error.code.rawValue, reason: error.reason ?? "unknown",
+                     debugEnabled: JAdManager.shared().debugMode)
     if stage == "load" { loading = false }
     showButton.isEnabled = false
     record("\(stage) failed code=\(error.code.rawValue) reason=\(error.reason ?? "unknown")")
   }
 
   fileprivate func record(_ event: String, info: JAdInfo? = nil) {
-    let network = info?.networkName.flatMap { $0.isEmpty ? nil : $0 } ?? "未知"
-    let source = info?.sourceIdentifier.flatMap { $0.isEmpty ? nil : $0 } ?? "未知"
+    let stages = ["load": "load.success", "show": "show.success", "click": "click", "close": "close",
+                  "videoStart": "video.start", "videoEnd": "video.end", "reward": "reward"]
+    if let stage = stages[event] {
+      sampleConsoleLog(stage, format: format.rawValue.lowercased(), debugEnabled: JAdManager.shared().debugMode)
+    }
+    let fields = jadbidDemoInfoFields(info)
+    let network = fields.network
+    let source = fields.source
     events.append("\(event) | network=\(network) | source=\(source)")
     if events.count > 40 { events.removeFirst() }
     eventText.text = events.joined(separator: "\n")

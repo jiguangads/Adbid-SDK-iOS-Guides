@@ -1,6 +1,28 @@
 #import "JAdbidFormatViewController.h"
 #import "JAdbidSDKManager.h"
 
+extern void JAdbidSampleLog(NSString *stage, NSString *format, NSInteger code, NSString *reason, BOOL debugEnabled);
+
+// BEGIN JADBID_DEMO_INFO_FIELDS
+// 当前公开字段优先；仅兼容根工程已核验的旧SDK快照，不搜索其它别名。
+static NSDictionary<NSString *, NSString *> *JAdbidDemoInfoFields(NSObject *info) {
+  id networkValue = nil;
+  id sourceValue = nil;
+  if ([info respondsToSelector:NSSelectorFromString(@"networkName")]) {
+    networkValue = [info valueForKey:@"networkName"];
+  } else if ([info respondsToSelector:NSSelectorFromString(@"adSourceName")]) {
+    networkValue = [info valueForKey:@"adSourceName"];
+  }
+  if ([info respondsToSelector:NSSelectorFromString(@"sourceIdentifier")]) {
+    sourceValue = [info valueForKey:@"sourceIdentifier"];
+  } else if ([info respondsToSelector:NSSelectorFromString(@"adSourceId")]) {
+    sourceValue = [info valueForKey:@"adSourceId"];
+  }
+  return @{@"network": [networkValue isKindOfClass:NSString.class] && [networkValue length] ? networkValue : @"未知",
+           @"source": [sourceValue isKindOfClass:NSString.class] && [sourceValue length] ? sourceValue : @"未知"};
+}
+// END JADBID_DEMO_INFO_FIELDS
+
 @interface JAdbidFormatViewController ()
 @property(nonatomic, strong) UITextView *eventView;
 @property(nonatomic, strong) NSMutableArray<NSString *> *events;
@@ -75,17 +97,29 @@
   return button;
 }
 
+- (NSString *)consoleFormat {
+  NSDictionary *formats = @{@"横幅广告" : @"banner", @"插屏广告" : @"interstitial", @"激励视频" : @"rewarded",
+                             @"原生广告" : @"native", @"开屏广告" : @"splash"};
+  return formats[self.title] ?: @"unknown";
+}
+
 - (BOOL)canLoad {
   if (!JAdManager.sharedInstance.initialized) {
     self.statusLabel.text = @"请返回首页，在完成隐私流程后初始化 SDK";
+    JAdbidSampleLog(@"load.failure", self.consoleFormat, JAdErrorNotInitialized, @"notInitialized",
+                    JAdManager.sharedInstance.debugMode);
     return NO;
   }
   if (!self.adUnitID.length) {
     self.statusLabel.text = @"请在 SampleConfig.plist 填写当前样式广告位";
+    JAdbidSampleLog(@"load.failure", self.consoleFormat, JAdErrorInvalidParameters, @"invalidLoadParameters",
+                    JAdManager.sharedInstance.debugMode);
     return NO;
   }
   if (self.isLoading) {
     self.statusLabel.text = @"广告正在加载，请等待回调";
+    JAdbidSampleLog(@"load.failure", self.consoleFormat, JAdErrorLoading, @"alreadyLoading",
+                    JAdManager.sharedInstance.debugMode);
     return NO;
   }
   return YES;
@@ -100,6 +134,7 @@
 }
 
 - (void)beginLoading {
+  JAdbidSampleLog(@"load.begin", self.consoleFormat, 0, nil, JAdManager.sharedInstance.debugMode);
   self.loading = YES;
   self.loadButton.enabled = NO;
   self.statusLabel.text = @"加载中…";
@@ -114,8 +149,13 @@
 }
 
 - (void)recordEvent:(NSString *)event info:(JAdInfo *)info {
-  NSString *network = info.networkName.length ? info.networkName : @"未知";
-  NSString *source = info.sourceIdentifier.length ? info.sourceIdentifier : @"未知";
+  NSDictionary *stages = @{@"load" : @"load.success", @"show" : @"show.success", @"click" : @"click",
+                            @"close" : @"close", @"videoStart" : @"video.start", @"videoEnd" : @"video.end",
+                            @"reward" : @"reward", @"sizeChanged" : @"banner.size"};
+  JAdbidSampleLog(stages[event], self.consoleFormat, 0, nil, JAdManager.sharedInstance.debugMode);
+  NSDictionary<NSString *, NSString *> *fields = JAdbidDemoInfoFields(info);
+  NSString *network = fields[@"network"];
+  NSString *source = fields[@"source"];
   [self.events addObject:[NSString stringWithFormat:@"%@ | network=%@ | source=%@",
                                                     event, network, source]];
   if (self.events.count > 40) [self.events removeObjectAtIndex:0];
@@ -123,6 +163,9 @@
 }
 
 - (void)recordFailure:(JAdError *)error stage:(NSString *)stage {
+  NSString *logStage = [stage isEqualToString:@"load"] ? @"load.failure" : @"show.failure";
+  JAdbidSampleLog(logStage, self.consoleFormat, error ? error.code : JAdErrorUnknown,
+                  error.reason, JAdManager.sharedInstance.debugMode);
   NSString *detail = [self displayTextForError:error];
   [self.events addObject:[NSString stringWithFormat:@"%@ failed | %@", stage,
                                                     detail.length ? detail : @"未知错误"]];
