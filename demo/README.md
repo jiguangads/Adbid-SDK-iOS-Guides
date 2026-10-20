@@ -7,14 +7,14 @@
 
 ## 安装依赖
 
-1. 当前两份 Demo 仍使用 [SDK 已公开旧候选](https://github.com/jiguangads/jadbid-ios-sdk/commit/ae9cabf2dae1a389cc7943d149011bfbce3bbcb5)，build 29；Podfile 固定该提交。它们不是 `jadbid-1.0.0-beta` SwiftPM 工程，不能算作 beta 的双语言消费验证。
+1. 当前两份 Demo 仍使用 [SDK 已公开旧候选](https://github.com/jiguangads/jadbid-ios-sdk/commit/ae9cabf2dae1a389cc7943d149011bfbce3bbcb5)，build 29；Podfile 固定该提交。它们不是 `jadbid-1.0.0-beta.1` SwiftPM 工程，不能算作 beta.1 的双语言消费验证。
 2. 分别进入 `oc`、`swift-demo` 运行 `pod install`，打开生成的 `Sample.xcworkspace`。Podfile 使用 SDK 公开精确 commit，并列出 11 个广告源 Adapter；对应厂商 SDK 由发行 Podspec 锁定。
 3. 在本地填写各工程的 `SampleConfig.plist`。不要把真实 App ID、广告位或设备标识提交到公开仓库。涉及 AdMob 的工程使用 [Google 公布的测试 App ID](https://developers.google.com/admob/ios/quick-start) 仅供示例；接入实际应用时必须换成自己的 App ID。
 4. 按应用需要配置签名、隐私描述和广告平台后台测试位后，在真机验证。11 个广告源的真实填充与回调仍需逐源验收。
 
 ## beta SwiftPM 验收路径
 
-在 Objective-C、Swift 两种宿主中分别用精确版本 `1.0.0-beta` 添加 SDK Package，选择 Core 与一个待测 Adapter 产品；11 个源逐源建立单源验收工程，按厂商官方契约单独安装对应 SDK/传递依赖。每个源都要检查依赖解析、完整 App 构建、签名前主 Bundle 资源、隐私清单和最终产物；不能仅凭当前 Podfile 的成功记录替代。SDK 仓 `copy_resources.py --help` 列出 `--source` 与 `--vendor-root` 等选项，但当前脚本不支持同一 App 多源资源顺序复制。Yandex AppMetrica 官方 SPM 下载的既有网络例外应在验收报告单列，不写成通过。
+在 Objective-C、Swift 两种宿主中分别用精确版本 `1.0.0-beta.1` 添加 SDK Package，选择 Core 与一个待测 Adapter 产品；11 个源逐源建立单源验收工程，按厂商官方契约单独安装对应 SDK/传递依赖。每个源都要检查依赖解析、完整 App 构建、签名前主 Bundle 资源、隐私清单和最终产物；不能仅凭当前 Podfile 的成功记录替代。SDK 仓 `copy_resources.py --help` 列出 `--source` 与 `--vendor-root` 等选项，但当前脚本不支持同一 App 多源资源顺序复制。Yandex AppMetrica 官方 SPM 下载的既有网络例外应在验收报告单列，不写成通过。
 
 项目最低支持 iOS 15。由于示例列出全部广告源，首次安装会拉取各厂商依赖；实际应用应按需要选择，而非照搬全源 Podfile。
 
@@ -26,7 +26,7 @@ Debug宿主会显式打开SDK的debugMode，即使链接Release候选也可联�
 
 点击加载后等待明确终态，加载中不提前显示失败；真正失败结束本次请求，当前不承诺后台自动缓存变化会触发新的load回调。公开示例使用当前广告源字段，并保留已验证的固定两代getter兼容读取。
 
-开启SDK日志时，初始化一次build.identity输出版本、source revision/digest、dirty、构型、build与有限模块摘要；只表示实际构建/链接身份，不证明填充或曝光。当前 Demo 旧候选 BuildIdentity.json 的 build=29、dirty=false；beta 包为 Jenkins build 2、dirty=false。
+开启SDK日志时，初始化一次build.identity输出版本、source revision/digest、dirty、构型、build与有限模块摘要；只表示实际构建/链接身份，不证明填充或曝光。当前 Demo 旧候选 BuildIdentity.json 的 build=29、dirty=false；beta.1 包为 Jenkins build 4、dirty=false。
 
 ## 旧公开候选的实际验证
 
