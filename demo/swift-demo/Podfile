@@ -1,17 +1,17 @@
 platform :ios, '15.0'
 project 'Sample.xcodeproj'
 target 'Sample' do
-  pod 'JAdbid/AdMob', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.3'
-  pod 'JAdbid/Bigo', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.3'
-  pod 'JAdbid/Facebook', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.3'
-  pod 'JAdbid/Fyber', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.3'
-  pod 'JAdbid/InMobi', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.3'
-  pod 'JAdbid/IronSource', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.3'
-  pod 'JAdbid/Mintegral', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.3'
-  pod 'JAdbid/Pangle', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.3'
-  pod 'JAdbid/Unity', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.3'
-  pod 'JAdbid/Vungle', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.3'
-  pod 'JAdbid/Yandex', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.3'
+  pod 'JAdbid/AdMob', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.4'
+  pod 'JAdbid/Bigo', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.4'
+  pod 'JAdbid/Facebook', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.4'
+  pod 'JAdbid/Fyber', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.4'
+  pod 'JAdbid/InMobi', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.4'
+  pod 'JAdbid/IronSource', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.4'
+  pod 'JAdbid/Mintegral', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.4'
+  pod 'JAdbid/Pangle', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.4'
+  pod 'JAdbid/Unity', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.4'
+  pod 'JAdbid/Vungle', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.4'
+  pod 'JAdbid/Yandex', :git => 'https://github.com/jiguangads/jadbid-ios-sdk.git', :tag => '1.0.0-beta.4'
 end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
