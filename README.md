@@ -1,19 +1,15 @@
 # JAdbid iOS SDK 集成指南与示例
 
-本仓库提供 JAdbid iOS SDK 的对外集成说明，以及 Objective-C、Swift 两个示例工程。SDK 二进制、CocoaPods Podspec 和 Swift Package 清单由独立的 [JAdbid iOS SDK 发布仓库](https://github.com/jiguangads/jadbid-ios-sdk)提供，本仓库不包含 SDK 或第三方广告 SDK 二进制。
+本仓库提供 JAdbid iOS SDK **1.0.0** 的集成说明和 Objective-C、Swift 示例工程。SDK 二进制、CocoaPods Podspec 与 Swift Package 清单位于 [JAdbid iOS SDK](https://github.com/jiguangads/jadbid-ios-sdk)。
 
-> 当前文档与 Demo Podfile 对应 `jadbid-1.0.0-beta.6`，CocoaPods Pod 名和 SwiftPM 包展示名均为 `JAdbid`。文档不证明该版渠道已发布；两份使用 Git Tag 的 Demo Podfile 仅在 GitHub Tag 可解析后才能远端安装，按 Trunk 版本号安装还须核对 CocoaPods 索引。旧版本与旧 Pod 的历史安装记录不受本版修改影响。
+## 开始集成
 
-## 内容
+- [SDK 集成说明](docs/integration.md)：CocoaPods、Swift Package Manager、依赖、资源与隐私配置。
+- [Demo 使用说明](demo/README.md)：示例工程、配置和运行步骤。
+- [Objective-C Demo](demo/oc/Sample.xcodeproj) 与 [Swift Demo](demo/swift-demo/Sample.xcodeproj)：两个独立的 Xcode 工程。
 
-- [SDK 集成说明](docs/integration.md)：环境、依赖、隐私、资源和初始化要求。
-- [Objective-C / Swift Demo 说明](demo/README.md)：工程结构、配置与运行步骤。
-- [Objective-C Demo](demo/oc/Sample.xcodeproj) 与 [Swift Demo](demo/swift-demo/Sample.xcodeproj)：两个独立 Xcode 工程。
+最低支持 **iOS 15.0**。设备与模拟器均提供 arm64 切片；不支持 Intel Mac 的 x86_64 模拟器。SDK 包含 Core 和 11 个可选广告源 Adapter，业务应用按需选择。
 
-两个 Demo 默认使用空的 App ID 和广告位，不会在启动时自动初始化 SDK 或请求广告。配置由集成方在本地填写；不要把正式凭据、设备标识或真实广告位提交到公开仓库。
+示例 Podfile 列出全部广告源及其厂商依赖，首次安装下载量较大。实际应用应按需删减；SwiftPM 的 JAdbid 产品不自动安装厂商 SDK，需按集成说明单独添加。
 
-当前候选使用 Jenkins build 6 的 Release 二进制；资源脚本已按官方原生 SPM 布局区分主 Bundle 与框架内资源，具体要求见[集成说明](docs/integration.md#原生-spm-资源布局)。构建身份不证明 beta.6 已完成本地或远端验收。
-
-最低支持 iOS 15。示例 Podfile 列出 Core 加 11 个可选广告源适配器及其厂商依赖，用于全源集成检查；实际业务应用应只选择需要的广告源。构建成功不代表广告填充、展示及回调已经通过真机验证。
-
-两语言旧提交的远端 CocoaPods 安装与模拟器 App 构建证据见[Demo验证说明](demo/README.md#旧公开候选的实际验证)；它不是 beta.6 的验收。beta.6 对应渠道可用后，还须重新验证两份 Demo 对新 Pod 的依赖解析与 App 构建。本仓库不包含 SDK/第三方二进制、Internal Demo 或实际广告配置。
+Demo 默认配置为空，启动不会自动申请权限、初始化 SDK 或请求广告。请在本地填写自己的配置并完成宿主隐私流程，不要将真实广告配置、凭据或设备标识提交到公开仓库。实际广告表现需在真实设备与正确的平台配置下验证。
