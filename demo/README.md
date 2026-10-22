@@ -7,14 +7,16 @@
 
 ## 安装依赖
 
-1. 两份 Demo 的 Podfile 指向新 Pod `JAdbid` 与 Tag `1.0.0-beta.5`，列出 11 个广告源 Adapter。执行远端 `pod install` 前须确认 GitHub Tag 已存在并可解析；本地候选可用隔离副本指向 SDK 候选目录验证。
+1. 两份 Demo 的 Podfile 指向新 Pod `JAdbid` 与 Tag `1.0.0-beta.6`，列出 11 个广告源 Adapter。执行远端 `pod install` 前须确认 GitHub Tag 已存在并可解析；本地候选可用隔离副本指向 SDK 候选目录验证。
 2. Tag 可解析后分别进入 `oc`、`swift-demo` 运行 `pod install`，打开生成的 `Sample.xcworkspace`；对应厂商 SDK 由 Podspec 锁定。首次安装全部广告源会下载较多厂商依赖，正式应用按需选择。
 3. 在本地填写各工程的 `SampleConfig.plist`。不要把真实 App ID、广告位或设备标识提交到公开仓库。涉及 AdMob 的工程使用 [Google 公布的测试 App ID](https://developers.google.com/admob/ios/quick-start) 仅供示例；接入实际应用时必须换成自己的 App ID。
 4. 按应用需要配置签名、隐私描述和广告平台后台测试位后，在真机验证。11 个广告源的真实填充与回调仍需逐源验收。
 
 ## beta SwiftPM 验收路径
 
-Tag 可解析后，在 Objective-C、Swift 两种宿主中分别用精确版本 `1.0.0-beta.5` 添加 SDK Package，选择 Core 与一个待测 Adapter 产品；11 个源逐源建立单源验收工程，按厂商官方契约单独安装对应 SDK/传递依赖。每个源都要检查依赖解析、完整 App 构建、签名前主 Bundle 资源、隐私清单和最终产物；不能仅凭当前 Pods Demo 的成功记录替代。SDK 仓 `copy_resources.py --help` 列出 `--source`、`--integration` 与 `--vendor-root` 等选项；纯 SPM AdMob 使用 `--integration spm`，Google 官方包没有 Pods 生成的两只主 Bundle，仍须检查 Google 框架资源与隐私清单。当前脚本不支持同一 App 多源资源顺序复制。Yandex AppMetrica 官方 SPM 下载的既有网络例外应在验收报告单列，不写成通过。
+Tag 可解析后，在 Objective-C、Swift 两种宿主中分别用精确版本 `1.0.0-beta.6` 添加 SDK Package，选择 Core 与一个待测 Adapter 产品；11 个源逐源建立单源验收工程，按厂商官方契约单独安装对应 SDK/传递依赖。每个源都要检查依赖解析、完整 App 构建、签名前主 Bundle 资源、隐私清单和最终产物；不能仅凭当前 Pods Demo 的成功记录替代。SDK 仓 `copy_resources.py --help` 列出 `--source`、`--integration` 与 `--vendor-root` 等选项；纯 SPM AdMob 使用 `--integration spm`，Google 官方包没有 Pods 生成的两只主 Bundle，仍须检查 Google 框架资源与隐私清单。当前脚本不支持同一 App 多源资源顺序复制。Yandex AppMetrica 官方 SPM 下载的既有网络例外应在验收报告单列，不写成通过。
+
+beta.6 的官方原生 SPM 资源规则与 Bigo 6.1.0 框架内资源检查见[集成说明](../docs/integration.md#原生-spm-资源布局)。Bigo 的 `--vendor-root` 指向所选切片的 `BigoADS.framework`，不是整个 XCFramework 或 Pods 根目录；检查时最终 App 内应已嵌入同一动态框架。旧候选的构建记录不作为 beta.6 验收。
 
 项目最低支持 iOS 15。由于示例列出全部广告源，首次安装会拉取各厂商依赖；实际应用应按需要选择，而非照搬全源 Podfile。
 
@@ -26,10 +28,10 @@ Debug宿主会显式打开SDK的debugMode，即使链接Release候选也可联�
 
 点击加载后等待明确终态，加载中不提前显示失败；真正失败结束本次请求，当前不承诺后台自动缓存变化会触发新的load回调。公开示例使用当前广告源字段，并保留已验证的固定两代getter兼容读取。
 
-开启SDK日志时，初始化一次build.identity输出版本、source revision/digest、dirty、构型、build与有限模块摘要；只表示实际构建/链接身份，不证明填充或曝光。历史旧候选 BuildIdentity.json 的 build=29、dirty=false；beta.5 基于 Jenkins build 5、dirty=false 的二进制。
+开启SDK日志时，初始化一次build.identity输出版本、source revision/digest、dirty、构型、build与有限模块摘要；只表示实际构建/链接身份，不证明填充或曝光。历史旧候选 BuildIdentity.json 的 build=29、dirty=false；beta.6 基于 Jenkins build 6、dirty=false 的二进制。
 
 ## 旧公开候选的实际验证
 
 SDK固定公开提交 `ae9cabf2dae1a389cc7943d149011bfbce3bbcb5`（1.0.0 build29，Release SDK），已从该远端提交分别完成OC/Swift的`pod install --no-repo-update`：每工程11项直接依赖、36个Pods；随后两个`Sample.xcworkspace`的Debug模拟器完整App构建均通过。这些结果仅证明旧提交，不证明 beta。锁定提交与实际安装Core设备/模拟器字节及BuildIdentity一致。验证在源码外全新副本进行，没有在公开仓提交Pods、锁文件、本机配置或构建产物。
 
-第三方旧deployment target与EXCLUDED_ARCHS合并有警告，没有导致旧提交构建失败。此结果不等于 beta.5 的 Pods/SPM 消费或真机广告填充/曝光通过；beta.5 的远端精确版本消费与 Release 回查须在相应渠道可用后执行。
+第三方旧deployment target与EXCLUDED_ARCHS合并有警告，没有导致旧提交构建失败。此结果不等于 beta.6 的 Pods/SPM 消费或真机广告填充/曝光通过；beta.6 的远端精确版本消费与 Release 回查须在相应渠道可用后执行。
