@@ -1,19 +1,27 @@
 # JAdbid iOS SDK 集成指南与示例
 
-本仓库提供 JAdbid iOS SDK 的对外集成说明，以及 Objective-C、Swift 两个示例工程。SDK 二进制、CocoaPods Podspec 和 Swift Package 清单由独立的 [JAdbid iOS SDK 发布仓库](https://github.com/jiguangads/jadbid-ios-sdk)提供，本仓库不包含 SDK 或第三方广告 SDK 二进制。
+本仓库提供 JAdbid iOS SDK **1.0.0** 的接入文档、技术支持手册，以及 Objective-C、Swift 示例。SDK 二进制与包声明见 [JAdbid iOS SDK](https://github.com/jiguangads/jadbid-ios-sdk)。
 
-> 当前文档与 Demo Podfile 对应 `jadbid-1.0.0-beta.6`，CocoaPods Pod 名和 SwiftPM 包展示名均为 `JAdbid`。文档不证明该版渠道已发布；两份使用 Git Tag 的 Demo Podfile 仅在 GitHub Tag 可解析后才能远端安装，按 Trunk 版本号安装还须核对 CocoaPods 索引。旧版本与旧 Pod 的历史安装记录不受本版修改影响。
+## 从这里开始
 
-## 内容
+| 你要完成的事情 | 阅读入口 |
+| --- | --- |
+| 第一次接入，先运行示例 | [快速集成](docs/quick-start.md) |
+| 在应用中配置 CocoaPods、SPM 或手动集成 | [完整集成指南](docs/integration.md) |
+| 安装并使用 OC / Swift 示例 | [Demo 使用说明](demo/README.md) |
+| 查找常见问题的简要答复 | [FAQ](docs/faq.md) |
+| 根据错误现象逐步检查 | [问题排查](docs/troubleshooting.md) |
+| 确认问题范围、收集材料并提交支持请求 | [技术支持手册](docs/technical-support.md) |
 
-- [SDK 集成说明](docs/integration.md)：环境、依赖、隐私、资源和初始化要求。
-- [Objective-C / Swift Demo 说明](demo/README.md)：工程结构、配置与运行步骤。
-- [Objective-C Demo](demo/oc/Sample.xcodeproj) 与 [Swift Demo](demo/swift-demo/Sample.xcodeproj)：两个独立 Xcode 工程。
+## 接入前确认
 
-两个 Demo 默认使用空的 App ID 和广告位，不会在启动时自动初始化 SDK 或请求广告。配置由集成方在本地填写；不要把正式凭据、设备标识或真实广告位提交到公开仓库。
+- 最低 **iOS 15.0**；真机、模拟器均为 **arm64**，不支持 x86_64 模拟器。
+- 提供 Core 和 11 个可选广告源 Adapter。Core 是基础模块，Adapter 用于连接对应广告源；首次接入建议先选一个源。
+- SwiftPM 的 JAdbid 产品不自动安装厂商 SDK；依赖、资源及框架设置统一见[完整集成指南](docs/integration.md)。
+- 安装前确认所选版本在对应渠道可用；查不到版本时按 [FAQ](docs/faq.md#version) 检查，不改用不明来源的二进制。
 
-当前候选使用 Jenkins build 6 的 Release 二进制；资源脚本已按官方原生 SPM 布局区分主 Bundle 与框架内资源，具体要求见[集成说明](docs/integration.md#原生-spm-资源布局)。构建身份不证明 beta.6 已完成本地或远端验收。
+## 示例与验证
 
-最低支持 iOS 15。示例 Podfile 列出 Core 加 11 个可选广告源适配器及其厂商依赖，用于全源集成检查；实际业务应用应只选择需要的广告源。构建成功不代表广告填充、展示及回调已经通过真机验证。
+[Objective-C Demo](demo/oc/Sample.xcodeproj) 与 [Swift Demo](demo/swift-demo/Sample.xcodeproj) 是两个独立工程。默认广告配置为空，启动不会自动申请权限、初始化 SDK 或请求广告。
 
-两语言旧提交的远端 CocoaPods 安装与模拟器 App 构建证据见[Demo验证说明](demo/README.md#旧公开候选的实际验证)；它不是 beta.6 的验收。beta.6 对应渠道可用后，还须重新验证两份 Demo 对新 Pod 的依赖解析与 App 构建。本仓库不包含 SDK/第三方二进制、Internal Demo 或实际广告配置。
+先检查“构建成功 → SDK 初始化成功 → 广告加载和展示”，分别记录结果。模拟器启动成功不能代替真实设备上的广告展示及回调验证。真实配置只在本地填写，日志和截图分享前按[技术支持手册](docs/technical-support.md#materials)脱敏。

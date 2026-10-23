@@ -1,69 +1,99 @@
-# JAdbid iOS SDK 集成说明
+# JAdbid iOS SDK 1.0.0 集成说明
 
-本文面向 JAdbid `jadbid-1.0.0-beta.6`。最低支持 iOS 15；SDK 包含 Core 和 11 个按需选择的广告源 Adapter。本版基于 Jenkins build 6 的 Release 二进制，包内版本为 `1.0.0`；对应分发 Tag 为 `1.0.0-beta.6`，是否已发布须核对 GitHub Tag 与 Trunk 索引。旧 Tag 与旧 CocoaPods Pod 不变。
+快速操作看[快速集成](quick-start.md)，常见问题看 [FAQ](faq.md)，定位错误看[问题排查](troubleshooting.md)，提交问题看[技术支持手册](technical-support.md)。
 
-## CocoaPods（beta.6，以 Trunk 索引为准）
+最低支持 iOS 15.0，提供 Core 与 11 个可选广告源 Adapter。设备和模拟器均为 arm64；不支持 x86_64 模拟器。JAdbid XCFramework 为静态框架，只链接，不作为动态框架嵌入。
 
-新 Pod `JAdbid 1.0.0-beta.6` 经 Trunk 登记及索引收录后，在应用的 Podfile 中按需添加模块，并执行 `pod install`：
+## CocoaPods
+
+在应用 Podfile 中选择需要的模块，然后执行 `pod install`：
 
 ```ruby
 platform :ios, '15.0'
 
 target 'YourApp' do
-  pod 'JAdbid/Core', '1.0.0-beta.6'
-  # 按需添加，例如：
-  # pod 'JAdbid/AdMob', '1.0.0-beta.6'
+  pod 'JAdbid/Core', '1.0.0'
+  # 按需选择一个广告源，例如：
+  # pod 'JAdbid/AdMob', '1.0.0'
 end
 ```
 
-使用 Adapter subspec 时，Core 和对应厂商 SDK 由 Podspec 声明的依赖解析；不要再手工重复添加同一 Adapter。宿主保留 `$(inherited)` 和 `-ObjC`。上述精确版本写法不能代替 Trunk 索引与实际远端消费验证。已发布旧 Pod 的版本继续按旧名称安装，不会自动切换。
+Adapter subspec 会依赖同版本 Core 和对应的厂商 SDK，无需重复添加同一模块。保留宿主已有的 `$(inherited)` 与 `-ObjC`。CocoaPods 按 Podspec 锁定厂商版本并处理其资源。
+
+本版本的 Pod 配置将模拟器构建限制为 arm64，并在 Pod target 排除 x86_64。模拟器 `ARCHS` 设置也会影响同一宿主与其它 Pods；若 App target 自行覆盖该设置，应保持 arm64。真机架构不受此模拟器配置影响。
 
 ## Swift Package Manager
 
-在 Xcode 添加 `https://github.com/jiguangads/jadbid-ios-sdk.git`；确认远端 Tag 可解析后精确选择 `1.0.0-beta.6`，包展示名为 `JAdbid`，产品仍选择 `JAdbidCore` 或一个待测 `JAdbid<Source>`。Package.swift 只声明 JAdbid 二进制产品，所选广告源的厂商 SDK 及传递依赖仍需宿主按厂商契约单独添加；不能把“选中 Adapter”理解成厂商依赖已自动接入。全源验收须让 11 个源分别进入单源宿主，不是同一 App 多源同装。
+在 Xcode 添加 `https://github.com/jiguangads/jadbid-ios-sdk.git`，精确选择版本 **1.0.0**，包名为 `JAdbid`。按需选择 `JAdbidCore` 或一个 `JAdbid<Source>` 产品。
 
-纯 SPM AdMob 单源宿主须在 App target 中额外链接下列两个官方产品；这是历史 build 5 本地验收使用的精确版本，不代表未来厂商版本自动兼容：
+SwiftPM 清单仅声明 JAdbid 的二进制产品，**不会自动安装厂商 SDK**。所选广告源的官方产品及传递依赖须由宿主单独添加，固定为兼容版本，不用浮动分支替代精确依赖。本文的资源脚本说明按单一广告源配置，不通过多次调用叠加不同源。
 
-- `https://github.com/googleads/swift-package-manager-google-mobile-ads.git`，产品 `GoogleMobileAds`，`exactVersion 13.7.0`。
-- `https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git`，产品 `GoogleUserMessagingPlatform`，`exactVersion 3.1.0`。
+### 厂商产品与固定版本
 
-SPM 集成还须在签名前把 SDK `Resources` 中的 TradPlus 资源及所选厂商要求的主 Bundle 资源复制到宿主。SDK 仓的 `copy_resources.py` 支持 `--resources`、`--destination`、`--source`、`--integration`、`--vendor-root`、`--verify-final`；先查看 `--help`，再按选中的广告源和实际厂商安装目录调用，并检查最终 App 产物。纯 SPM AdMob 应传 `--source AdMob --integration spm`：Google 官方 SPM 产品不包含 Pods 生成的 `GoogleMobileAdsResources.bundle`、`UserMessagingPlatformResources.bundle`，不要求从其安装目录复制两者；仍须检查最终 App 中 Google 框架资源与隐私清单。CocoaPods 正常安装会处理其资源，无需额外运行脚本；只有手工用脚本核验 Pods 来源资源时传 `--integration pods`，仍核验两只 Pods 主 Bundle。当前脚本一次只支持一个源，且会拒绝已有的其它源资源，不能通过顺序调用完成同 App 多源接入。最终 App 隐私清单与申报由宿主审核。
+在 Xcode 添加下表中的官方包，版本规则选择精确版本，并将对应产品加入 App target。只添加所选广告源的行；AdMob 的两行均需添加。下表是本指南对应的固定接入配置，不表示厂商最新版本。
+
+| 广告源 | 官方 SwiftPM 包 | 精确版本 | App target 产品 |
+| --- | --- | --- | --- |
+| AdMob | [swift-package-manager-google-user-messaging-platform](https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git) | `3.1.0` | `GoogleUserMessagingPlatform` |
+| AdMob | [swift-package-manager-google-mobile-ads](https://github.com/googleads/swift-package-manager-google-mobile-ads.git) | `13.7.0` | `GoogleMobileAds` |
+| Bigo | [BigoADS-Swift-Package](https://github.com/bigo-ads/BigoADS-Swift-Package.git) | `6.1.0` | `BigoADS` |
+| Facebook | [FBAudienceNetwork](https://github.com/facebook/FBAudienceNetwork.git) | `6.22.0` | `FBAudienceNetwork` |
+| Fyber | [DTExchangeSDK-iOS-SPM](https://github.com/inner-active/DTExchangeSDK-iOS-SPM.git) | `8.4.7` | `DTExchangeSDK` |
+| InMobi | [InMobiSDK-Swift-Package](https://github.com/InMobi/InMobiSDK-Swift-Package.git) | `11.4.1` | `InMobiSDK` |
+| IronSource | [LevelPlay-Swift-Package](https://github.com/ironsource-mobile/LevelPlay-Swift-Package.git) | `9.5.0` | `UnityMediationSDK` |
+| Mintegral | [MintegralAdSDK-Swift-Package](https://github.com/Mintegral-official/MintegralAdSDK-Swift-Package.git) | `8.1.5` | `MintegralAdSDK` |
+| Pangle | [AdsGlobalPackage](https://github.com/bytedance/AdsGlobalPackage.git) | `8.2.0-release.9` | `TikTokBusinessSDK` |
+| Unity | [Unity-Ads-Swift-Package](https://github.com/Unity-Technologies/Unity-Ads-Swift-Package.git) | `4.19.0` | `UnityAds` |
+| Vungle | [VungleAdsSDK-SwiftPackageManager](https://github.com/Vungle/VungleAdsSDK-SwiftPackageManager.git) | `7.7.6` | `VungleAdsSDK` |
+| Yandex | [yandex-ads-sdk-ios](https://github.com/yandexmobile/yandex-ads-sdk-ios.git) | `8.3.0` | `YandexMobileAds` |
+
+保留官方包解析的传递依赖和 `Package.resolved`，不要修改厂商 manifest 或用 Pods 二进制代替官方 SwiftPM 输入。Yandex 的 AppMetrica 等依赖、IronSource/Unity 的 Ad Quality 等依赖由相应包关系解析，不能只复制一个主框架。资源要求见下文的[原生 SPM 资源布局](#原生-spm-资源布局)。
+
+纯 Objective-C 宿主选择广告源时，还需继承 `$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)` 的 Swift 库搜索路径；该路径不代替厂商 SDK 链接。
+
+### 资源复制
+
+在签名前将 `Resources/TradPlusAds.bundle`、`Resources/TradPlusADX.bundle` 及所选源要求的主 Bundle 复制到 App。先运行 SDK 仓库的 `python3 copy_resources.py --help` 查看参数。
+
+示例命令中的路径需替换为实际 SDK、厂商资源和 App 目录：
+
+```sh
+python3 <SDK目录>/copy_resources.py   --resources <SDK目录>/Resources   --destination <App主目录>   --source AdMob --integration spm
+```
+
+构建后使用相同来源参数并追加 `--verify-final` 只读核对最终 App，不对已签名 App 补拷资源。脚本每次只处理一个源，会拒绝其它源资源污染；不能通过顺序调用完成同一 App 多源资源叠加。最终 App 的自动资源、框架内资源与隐私清单还需单独检查。
+
+CocoaPods 正常安装已处理资源，无需另跑复制脚本；仅手工核对 Pods 来源资源时使用 `--integration pods`，按该渠道的实际资源布局核验。
 
 ## 原生 SPM 资源布局
 
-beta.6 的脚本按厂商官方原生 SPM 布局检查资源，不从 Pods 安装规则推定 SPM 会生成同名 Bundle。下面仅列脚本需要复制到 App 主 Bundle 的厂商资源；所有源仍须复制 TradPlus 两只公共 Bundle，并检查厂商自动资源、框架内资源及最终 App 隐私清单。
+所有源均需保留两只 JAdbid Core 公共 Bundle。以下是额外厂商资源要求；不得以 Pods 会生成同名 Bundle 推断官方 SwiftPM 包也包含它。
 
-| 广告源 | 原生 SPM 的厂商主 Bundle 要求 |
+| 广告源 | 官方原生 SPM 资源要求 |
 | --- | --- |
-| AdMob、Facebook、Fyber、IronSource、Unity、Vungle | 不要求 Pods 生成的同名主 Bundle；按官方包核对自动或框架内资源 |
-| InMobi | 无额外主 Bundle；仍核对厂商资源与隐私清单 |
-| Mintegral | `MTGResources.bundle` |
-| Pangle | `PAGAdSDK.bundle` |
-| Yandex | `MobileAdsBundle.bundle`；官方 AppMetrica SPM 的网络问题单列实际结果 |
-| Bigo | 官方 6.1.0 的资源在动态框架内，按下文验证 |
+| AdMob、Facebook、Fyber、IronSource、Unity、Vungle | 不要求仅由 Pods 生成的同名主 Bundle；保留官方自动资源、框架内资源与隐私清单 |
+| InMobi | 无额外主 Bundle，保留厂商资源与隐私清单 |
+| Mintegral | 主目录 `MTGResources.bundle` |
+| Pangle | 主目录 `PAGAdSDK.bundle` |
+| Yandex | 主目录 `MobileAdsBundle.bundle`，并链接其 AppMetrica 等真实传递依赖 |
+| Bigo | 按下文保留动态框架内资源及隐私清单 |
 
-Bigo 原生 SPM 使用官方 6.1.0。先按所选设备或模拟器切片链接并 **Embed & Sign** `BigoADS.framework`，保留其中 `BigoADSRes.bundle` 与原始 `PrivacyInfo.xcprivacy`；签名前执行脚本时，`--vendor-root` 必须指向该切片的 `BigoADS.framework`，`--destination` 指向已经包含 `Frameworks/BigoADS.framework` 的 App。使用 `--source Bigo --integration spm`，并以 `--verify-final` 核对最终框架资源与厂商原件一致，不生成或复制 Pods 专用的 `BigoADS.bundle` 到主目录。CocoaPods Bigo 仍由 Podspec 固定为 5.3.0，与原生 SPM 6.1.0 分开验收；不修改 Pod 依赖来冒充 SPM 支持。
-
-这些是本版验收要求，不是 beta.6 全源已通过的声明。两语言、设备/模拟器、Pods/原生 SPM 的结果和无法执行项须分别记录。
+Bigo 官方原生 SwiftPM 使用 `6.1.0`。按设备或模拟器切片链接并 **Embed & Sign** `BigoADS.framework`，保留其中的 `BigoADSRes.bundle` 和 `PrivacyInfo.xcprivacy`。脚本使用 `--source Bigo --integration spm`，`--vendor-root` 指向选中的 `BigoADS.framework`；检查时目标 App 中应包含同一 `Frameworks/BigoADS.framework`。使用 `--verify-final` 对照原件核验，不生成 Pods 专用的独立 `BigoADS.bundle`。CocoaPods 的 Bigo 依赖仍为 `5.3.0`，两个渠道按各自契约处理。
 
 ## 手动集成
 
-确认远端 Tag 可解析后，从 `1.0.0-beta.6` 获取 `JAdbidCore.xcframework` 和所选 Adapter XCFramework。JAdbid 静态框架选择 **Do Not Embed**；厂商动态框架依其官方要求 **Embed & Sign**。复制发布包 `Resources` 内容到宿主主 Bundle，保留第三方许可和隐私清单。旧提交 `ae9cabf2dae1a389cc7943d149011bfbce3bbcb5` 仅供历史联调回溯。
+从公开 SDK 仓库的 `1.0.0` Tag 获取 Core 与所选 Adapter XCFramework。JAdbid 选择 **Do Not Embed**；厂商动态框架按其官方要求 **Embed & Sign**。复制 SDK Resources 和所选厂商资源，保留 Licenses 与隐私清单，资源脚本使用对应的 `--integration manual`。
 
-## 初始化、隐私与广告生命周期
+## 初始化、隐私与生命周期
 
-宿主先完成适用的隐私流程，再显式初始化 JAdbid。ATT 提示和 `NSUserTrackingUsageDescription` 由宿主负责；SDK 示例不会代替用户授权。按广告样式持有广告对象，以复用有效缓存；页面真正退出时再销毁。开屏广告使用宿主 `UIWindow`；Banner 和 Native 在加载前设置尺寸。
+宿主先完成适用的隐私流程，再显式初始化 JAdbid。ATT 提示与 `NSUserTrackingUsageDescription` 由宿主负责，Demo 中的隐私确认操作不代表系统已授权。
 
-公开日志和回调只应使用 JAdbid 公共信息。不要记录 IDFA、App ID、广告位、请求体、原始厂商对象或令牌。最终 App 的隐私申报仍由宿主审核。
+持有广告对象以复用有效缓存，真正退出页面时销毁；开屏广告使用宿主 `UIWindow`，Banner 与 Native 在加载前设置尺寸。加载期间等待明确的成功或失败回调；加载失败结束本次请求。不要依赖后台缓存可用性变化自动触发新的加载回调。
 
-## 验证边界
+不得记录 IDFA、真实 App ID、广告位、请求体、原始厂商对象或令牌。宿主应审核最终 App 的首方及厂商隐私清单、权限描述与隐私申报。
 
-先验证依赖解析、资源、无广告启动、所选广告源的设备/模拟器构建，再在真实设备及已配置的广告平台后台验证加载、可见展示、曝光和回调。Demo 的成功构建不等同于真实广告验收。
+## 调试日志与运行检查
 
-## 联调日志与候选身份
+初始化前设置 `JAdConfig.debugMode` 可启用普通日志；具体调用见 [Objective-C 初始化示例](../demo/oc/ObjectiveC/Common/JAdbidSDKManager.m)和 [Swift 初始化示例](../demo/swift-demo/Swift/Common/SampleSession.swift)。Debug Demo 会显式开启；Release 默认关闭普通事件，保留精简错误。通过 `[JAdbid]` 和 `[JAdbidDemo]` 区分 SDK 与示例事件，不将屏幕上的原始广告信息拼入控制台日志。
 
-初始化前设置config.debugMode（或使用Manager同名开关）可启用普通日志；两语言Demo在Debug显式打开，Release普通事件默认关闭，精简错误仍可见。SDK前缀[JAdbid]、Demo前缀[JAdbidDemo]分别表示加载生命周期和示例操作；日志使用有限首方阶段/原因，不输出IDFA、App ID、广告位、原始错误字典、令牌或厂商对象。屏幕显示的广告源信息不直接拼入控制台事件。
-
-初始化一次build.identity诊断与包内BuildIdentity.json对应，包含SDK/后端版本、source revision/digest、dirty、Debug/Release、构建号和有限模块摘要。beta.6 基于干净源码的 Jenkins build 6 二进制；Demo Podfile 指向本版 Tag，不能再按旧 build 29 的安装结果推断本版验收已通过。该身份不是签名或真机广告成功证明。
-
-加载中继续等待明确成功/失败；真实失败仍结束本次请求，后台自动加载后的新可用性通知尚未实现。公开Demo的隐私确认只是宿主流程操作，不等于ATT或其他系统授权，不新增Internal的ATT/IDFA诊断页。
+先检查依赖解析、链接、资源和默认无请求启动，再使用真实设备与广告平台配置验证加载、可见展示、曝光及回调。构建成功或模拟器启动不代表实际广告效果。
