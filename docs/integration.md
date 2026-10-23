@@ -1,6 +1,6 @@
 # JAdbid iOS SDK 1.0.0 集成说明
 
-快速操作看[快速集成](quick-start.md)，常见问题看 [FAQ](faq.md)，定位错误看[问题排查](troubleshooting.md)，提交问题看[技术支持手册](technical-support.md)。
+快速操作看[快速集成](quick-start.md)，接口与回调看 [API 参考](api-reference.md)，常见问题看 [FAQ](faq.md)，定位错误看[问题排查](troubleshooting.md)，提交问题看[技术支持手册](technical-support.md)。
 
 最低支持 iOS 15.0，提供 Core 与 11 个可选广告源 Adapter。设备和模拟器均为 arm64；不支持 x86_64 模拟器。JAdbid XCFramework 为静态框架，只链接，不作为动态框架嵌入。
 
