@@ -1,5 +1,7 @@
 # Objective-C 与 Swift Demo
 
+首次使用先看[快速集成](../docs/quick-start.md)；常见问题见 [FAQ](../docs/faq.md)，材料收集见[技术支持手册](../docs/technical-support.md)。
+
 - `oc/Sample.xcodeproj`：Objective-C 宿主。
 - `swift-demo/Sample.xcodeproj`：Swift 宿主。
 

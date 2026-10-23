@@ -1,5 +1,7 @@
 # JAdbid iOS SDK 1.0.0 集成说明
 
+快速操作看[快速集成](quick-start.md)，常见问题看 [FAQ](faq.md)，定位错误看[问题排查](troubleshooting.md)，提交问题看[技术支持手册](technical-support.md)。
+
 最低支持 iOS 15.0，提供 Core 与 11 个可选广告源 Adapter。设备和模拟器均为 arm64；不支持 x86_64 模拟器。JAdbid XCFramework 为静态框架，只链接，不作为动态框架嵌入。
 
 ## CocoaPods
@@ -26,10 +28,26 @@ Adapter subspec 会依赖同版本 Core 和对应的厂商 SDK，无需重复添
 
 SwiftPM 清单仅声明 JAdbid 的二进制产品，**不会自动安装厂商 SDK**。所选广告源的官方产品及传递依赖须由宿主单独添加，固定为兼容版本，不用浮动分支替代精确依赖。本文的资源脚本说明按单一广告源配置，不通过多次调用叠加不同源。
 
-AdMob 使用以下两个官方 SwiftPM 产品：
+### 厂商产品与固定版本
 
-- [GoogleMobileAds](https://github.com/googleads/swift-package-manager-google-mobile-ads.git)，精确版本 `13.7.0`。
-- [GoogleUserMessagingPlatform](https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git)，精确版本 `3.1.0`。
+在 Xcode 添加下表中的官方包，版本规则选择精确版本，并将对应产品加入 App target。只添加所选广告源的行；AdMob 的两行均需添加。下表是本指南对应的固定接入配置，不表示厂商最新版本。
+
+| 广告源 | 官方 SwiftPM 包 | 精确版本 | App target 产品 |
+| --- | --- | --- | --- |
+| AdMob | [swift-package-manager-google-user-messaging-platform](https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git) | `3.1.0` | `GoogleUserMessagingPlatform` |
+| AdMob | [swift-package-manager-google-mobile-ads](https://github.com/googleads/swift-package-manager-google-mobile-ads.git) | `13.7.0` | `GoogleMobileAds` |
+| Bigo | [BigoADS-Swift-Package](https://github.com/bigo-ads/BigoADS-Swift-Package.git) | `6.1.0` | `BigoADS` |
+| Facebook | [FBAudienceNetwork](https://github.com/facebook/FBAudienceNetwork.git) | `6.22.0` | `FBAudienceNetwork` |
+| Fyber | [DTExchangeSDK-iOS-SPM](https://github.com/inner-active/DTExchangeSDK-iOS-SPM.git) | `8.4.7` | `DTExchangeSDK` |
+| InMobi | [InMobiSDK-Swift-Package](https://github.com/InMobi/InMobiSDK-Swift-Package.git) | `11.4.1` | `InMobiSDK` |
+| IronSource | [LevelPlay-Swift-Package](https://github.com/ironsource-mobile/LevelPlay-Swift-Package.git) | `9.5.0` | `UnityMediationSDK` |
+| Mintegral | [MintegralAdSDK-Swift-Package](https://github.com/Mintegral-official/MintegralAdSDK-Swift-Package.git) | `8.1.5` | `MintegralAdSDK` |
+| Pangle | [AdsGlobalPackage](https://github.com/bytedance/AdsGlobalPackage.git) | `8.2.0-release.9` | `TikTokBusinessSDK` |
+| Unity | [Unity-Ads-Swift-Package](https://github.com/Unity-Technologies/Unity-Ads-Swift-Package.git) | `4.19.0` | `UnityAds` |
+| Vungle | [VungleAdsSDK-SwiftPackageManager](https://github.com/Vungle/VungleAdsSDK-SwiftPackageManager.git) | `7.7.6` | `VungleAdsSDK` |
+| Yandex | [yandex-ads-sdk-ios](https://github.com/yandexmobile/yandex-ads-sdk-ios.git) | `8.3.0` | `YandexMobileAds` |
+
+保留官方包解析的传递依赖和 `Package.resolved`，不要修改厂商 manifest 或用 Pods 二进制代替官方 SwiftPM 输入。Yandex 的 AppMetrica 等依赖、IronSource/Unity 的 Ad Quality 等依赖由相应包关系解析，不能只复制一个主框架。资源要求见下文的[原生 SPM 资源布局](#原生-spm-资源布局)。
 
 纯 Objective-C 宿主选择广告源时，还需继承 `$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)` 的 Swift 库搜索路径；该路径不代替厂商 SDK 链接。
 
@@ -76,6 +94,6 @@ Bigo 官方原生 SwiftPM 使用 `6.1.0`。按设备或模拟器切片链接并 
 
 ## 调试日志与运行检查
 
-初始化前设置 `config.debugMode`，或使用 Manager 的同名开关，可启用普通日志。Debug Demo 会显式开启；Release 默认关闭普通事件，保留精简错误。通过 `[JAdbid]` 和 `[JAdbidDemo]` 区分 SDK 与示例事件，不将屏幕上的原始广告信息拼入控制台日志。
+初始化前设置 `JAdConfig.debugMode` 可启用普通日志；具体调用见 [Objective-C 初始化示例](../demo/oc/ObjectiveC/Common/JAdbidSDKManager.m)和 [Swift 初始化示例](../demo/swift-demo/Swift/Common/SampleSession.swift)。Debug Demo 会显式开启；Release 默认关闭普通事件，保留精简错误。通过 `[JAdbid]` 和 `[JAdbidDemo]` 区分 SDK 与示例事件，不将屏幕上的原始广告信息拼入控制台日志。
 
 先检查依赖解析、链接、资源和默认无请求启动，再使用真实设备与广告平台配置验证加载、可见展示、曝光及回调。构建成功或模拟器启动不代表实际广告效果。
