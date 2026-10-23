@@ -8,6 +8,7 @@
 | --- | --- |
 | 第一次接入，先运行示例 | [快速集成](docs/quick-start.md) |
 | 在应用中配置 CocoaPods、SPM 或手动集成 | [完整集成指南](docs/integration.md) |
+| 查询接口、参数、回调和错误码 | [API 参考](docs/api-reference.md) |
 | 安装并使用 OC / Swift 示例 | [Demo 使用说明](demo/README.md) |
 | 查找常见问题的简要答复 | [FAQ](docs/faq.md) |
 | 根据错误现象逐步检查 | [问题排查](docs/troubleshooting.md) |

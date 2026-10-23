@@ -71,7 +71,7 @@ Swift 示例将目录换成 `demo/swift-demo`，其余命令相同；两套工�
 
 ## 接入自己的应用
 
-保留上述安装、配置、隐私、初始化、加载和展示顺序。先按[完整集成指南](integration.md)设置宿主依赖、资源与框架，再参考现有示例的实际调用：
+保留上述安装、配置、隐私、初始化、加载和展示顺序。先按[完整集成指南](integration.md)设置宿主依赖、资源与框架，按 [API 参考](api-reference.md)查询方法、参数和回调，再参考现有示例的实际调用：
 
 - Objective-C：[初始化管理](../demo/oc/ObjectiveC/Common/JAdbidSDKManager.m)、[广告样式](../demo/oc/ObjectiveC/Ads)。
 - Swift：[初始化管理](../demo/swift-demo/Swift/Common/SampleSession.swift)、[广告样式](../demo/swift-demo/Swift/Ads)。

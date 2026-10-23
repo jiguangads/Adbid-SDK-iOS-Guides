@@ -1,6 +1,6 @@
 # 技术支持手册
 
-本手册用于确认集成问题、组织排查步骤和提交支持请求。第一次接入看[快速集成](quick-start.md)，技术参数看[完整集成指南](integration.md)，简要答复看 [FAQ](faq.md)。
+本手册用于确认集成问题、组织排查步骤和提交支持请求。第一次接入看[快速集成](quick-start.md)，技术参数看[完整集成指南](integration.md)，简要答复看 [FAQ](faq.md)，接口、回调与错误码看 [API 参考](api-reference.md)。
 
 ## 提交入口
 
